@@ -38,12 +38,22 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
   });
 
   app.get("/filteredimage", async (req, res) => {
-    console.log("🚀 ~ file: server.ts ~ line 41 ~ app.get ~ req", req.query.image_url)
+    //console.log("🚀 ~ file: server.ts ~ line 41 ~ app.get ~ req", req.query.image_url)
     const imageUrl = req.query.image_url
     filterImageFromURL(imageUrl)
       .then((imageFilePath) => {
-        res.status(200).sendFile(imageFilePath)
-        setTimeout(function(){ deleteLocalFiles([imageFilePath]) }, 5000);
+        res.status(200).sendFile(imageFilePath, (error) => {
+          //console.log("🚀 ~ file: server.ts ~ line 46 ~ res.status ~ imageFilePath", imageFilePath)
+          if(error){
+            res.status(500).send(error)
+          }else{
+            try{
+              deleteLocalFiles([imageFilePath])
+            }catch(err){
+              res.status(500).send(err)
+            }
+          }
+        })
       })
       .catch((err) => {
         res.status(500).send(err)
